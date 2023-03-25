@@ -123,7 +123,7 @@ class LiDAR2Camera(object):
                     color = cmap[int(510.0 / depth), :]
                     cv2.circle(img_bis,(int(np.round(self.imgfov_pts_2d[i, 0])), int(np.round(self.imgfov_pts_2d[i, 1]))),2,color=tuple(color),thickness=-1,)
             h, w, _ = img_bis.shape
-            if (len(distances)>2):
+            if (len(distances)>1): # 2 meter
                 distances = filter_outliers(distances)
                 best_distance = get_best_distance(distances, technique="average")
                 cv2.putText(img_bis, '{0:.2f} m'.format(best_distance), (int(box[0]*w),int(box[1]*h)), cv2.FONT_HERSHEY_SIMPLEX, 0.75, (255, 0, 0), 3, cv2.LINE_AA)    
@@ -168,7 +168,7 @@ def rectContains(rect,pt, w, h, shrink_factor = 0):
     return x1 < pt[0]<x2 and y1 <pt[1]<y2
 
 def run_obstacle_detection(img, yolo):
-    start_time=time.time()
+    # start_time=time.time()
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     resized_image = yolo.resize_image(img)
     # 0 ~ 255 to 0.0 ~ 1.0
@@ -188,8 +188,8 @@ def run_obstacle_detection(img, yolo):
         pred_bboxes = yolo.candidates_to_pred_bboxes(candidates[0], iou_threshold=0.35, score_threshold=0.40)
         pred_bboxes = pred_bboxes[~(pred_bboxes==0).all(1)]
         pred_bboxes = yolo.fit_pred_bboxes_to_original(pred_bboxes, img.shape)
-        exec_time = time.time() - start_time
-        print("time: {:.2f} ms".format(exec_time * 1000))
+        # exec_time = time.time() - start_time
+        # print("time: {:.2f} ms".format(exec_time * 1000))
         result = yolo.draw_bboxes(img, pred_bboxes)
         result = cv2.cvtColor(result, cv2.COLOR_BGR2RGB)
     return result, pred_bboxes
