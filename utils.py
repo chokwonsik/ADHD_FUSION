@@ -133,11 +133,16 @@ class LiDAR2Camera(object):
     
     def pipeline(self, image, point_cloud, yolo):
         img = image.copy()
-        lidar_img = self.show_lidar_on_image(point_cloud[:,:3], image)
+        
+        #Code for downsampling (cuda error)
+        point_cloud_array = np.asarray(point_cloud.points)
+
+        lidar_img = self.show_lidar_on_image(point_cloud_array[:,:3], image)
         result, pred_bboxes = run_obstacle_detection(img, yolo)
         img_final, _ = self.lidar_camera_fusion(pred_bboxes, result)
         
         return img_final
+
     
 def filter_outliers(distances):
     inliers = []
