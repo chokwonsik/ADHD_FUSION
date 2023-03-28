@@ -133,11 +133,7 @@ class LiDAR2Camera(object):
     
     def pipeline(self, image, point_cloud, yolo):
         img = image.copy()
-        
-        #Code for downsampling (cuda error)
-        point_cloud_array = np.asarray(point_cloud.points)
-
-        lidar_img = self.show_lidar_on_image(point_cloud_array[:,:3], image)
+        lidar_img = self.show_lidar_on_image(point_cloud[:,:3], image)
         result, pred_bboxes = run_obstacle_detection(img, yolo)
         img_final, _ = self.lidar_camera_fusion(pred_bboxes, result)
         
