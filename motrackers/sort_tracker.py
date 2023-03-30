@@ -5,7 +5,7 @@ from motrackers.track import KFTrackSORT, KFTrack4DSORT
 from motrackers.centroid_kf_tracker import CentroidKF_Tracker
 
 
-def assign_tracks2detection_iou(bbox_tracks, bbox_detections, iou_threshold=0.3):
+def assign_tracks2detection_iou(bbox_tracks, bbox_detections, iou_threshold=0.4):
     """
     Assigns detected bounding boxes to tracked bounding boxes using IoU as a distance metric.
 
@@ -140,7 +140,7 @@ class SORT(CentroidKF_Tracker):
                     self._remove_track(track_id)
         else:
             matches, unmatched_detections, unmatched_tracks = assign_tracks2detection_iou(
-                bbox_tracks, bbox_detections, iou_threshold=0.3)
+                bbox_tracks, bbox_detections, iou_threshold=0.4)
 
             for i in range(matches.shape[0]):
                 t, d = matches[i, :]

@@ -123,18 +123,21 @@ class LiDAR2Camera(object):
         return img_bis, distances
     
     def pipeline(self, image, point_cloud, yolo):
-        img = image.copy()
+        try:
+            img = image.copy()
         
-        #Code for downsampling (cuda error)
-        point_cloud_array = np.asarray(point_cloud.points)
+            #Code for downsampling (cuda error)
+            point_cloud_array = np.asarray(point_cloud.points)
 
-        # start_time=time.time()
-        result, pred_bboxes = run_obstacle_detection(img, yolo)
-        img_final, _ = self.lidar_camera_fusion(pred_bboxes, result, point_cloud_array[:,:3])
-        # exec_time = time.time() - start_time
-        # print("time: {:.2f} ms".format(exec_time * 1000))
+            # start_time=time.time()
+            result, pred_bboxes = run_obstacle_detection(img, yolo)
+            img_final, _ = self.lidar_camera_fusion(pred_bboxes, result, point_cloud_array[:,:3])
+            # exec_time = time.time() - start_time
+            # print("time: {:.2f} ms".format(exec_time * 1000))
+        except:
+            pass
 
-        return img_final, pred_bboxes
+        return img_final, pred_bboxes, result
 
 
 def filter_outliers(distances):
@@ -215,3 +218,18 @@ def run_obstacle_detection(img, yolo):
     # exec_time = time.time() - start_time
     # print("time: {:.2f} ms".format(exec_time * 1000))
     return result, car_list
+
+def remove_large_clusters(point_cloud, labels, cluster_size_threshold):
+       
+    # Count points in each cluster
+    unique, counts = np.unique(labels, return_counts=True)
+    cluster_sizes = dict(zip(unique, counts))
+    
+    # Filter out clusters with size greater than threshold
+    large_clusters = [cluster_idx for cluster_idx in cluster_sizes if cluster_sizes[cluster_idx] > cluster_size_threshold]
+    filtered_labels = np.where(np.isin(labels, large_clusters), -1, labels)
+    
+    # Remove points in filtered clusters
+    filtered_point_cloud = point_cloud.select_by_index(np.where(filtered_labels > -1)[0])
+    
+    return filtered_point_cloud
