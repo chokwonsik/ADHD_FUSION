@@ -25,11 +25,11 @@ def data_path():
     return video_images, video_points, calib_files
 
 def yolo_make():
-    yolo = YOLOv4(tiny=False)
+    yolo = YOLOv4(tiny=True)
     yolo.classes = "data/coco.names"
     yolo.make_model()
-    # yolo.load_weights("data/yolov4-tiny.weights", weights_type="yolo")
-    yolo.load_weights("data/yolov4.weights", weights_type="yolo")
+    yolo.load_weights("data/yolov4-tiny.weights", weights_type="yolo")
+    # yolo.load_weights("data/yolov4.weights", weights_type="yolo")
     return yolo
 
 class LiDAR2Camera(object):
@@ -184,7 +184,7 @@ def run_obstacle_detection(img, yolo):
         _candidates.append(tf.reshape(candidate, shape=(1, grid_size * grid_size * 3, -1)))
         candidates = np.concatenate(_candidates, axis=1)
         # pred_bboxes = yolo.candidates_to_pred_bboxes(candidates[0], iou_threshold=0.35, score_threshold=0.40)
-        pred_bboxes = yolo.candidates_to_pred_bboxes(candidates[0], iou_threshold=0.40, score_threshold=0.35)
+        pred_bboxes = yolo.candidates_to_pred_bboxes(candidates[0], iou_threshold=0.50, score_threshold=0.40)
 
         pred_bboxes = pred_bboxes[~(pred_bboxes==0).all(1)]
         pred_bboxes = yolo.fit_pred_bboxes_to_original(pred_bboxes, img.shape)
